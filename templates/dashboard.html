@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WhatsApp Bot Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+
+<div class="container">
+    <h1 class="mb-4">📤 WhatsApp Bot Dashboard</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ messages[0] }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- CSV Upload -->
+    <form action="/upload_csv" method="post" enctype="multipart/form-data" class="mb-3">
+        <label class="form-label">📁 Upload Contacts CSV:</label>
+        <input type="file" name="csv_file" class="form-control mb-2" required>
+        <button class="btn btn-primary">Upload CSV</button>
+    </form>
+
+    <!-- Media Upload -->
+    <form action="/upload_media" method="post" enctype="multipart/form-data" class="mb-3">
+        <label class="form-label">🖼 Upload Media (image/video):</label>
+        <input type="file" name="media_file" class="form-control mb-2">
+        <button class="btn btn-secondary">Upload Media</button>
+    </form>
+
+    {% if media %}
+        <div class="mb-3">
+            <label class="form-label">📷 Media Preview:</label><br>
+            {% if media.endswith('.jpg') or media.endswith('.png') or media.endswith('.jpeg') %}
+                <img src="{{ media.replace('static', '') }}" class="img-fluid" width="200">
+            {% elif media.endswith('.mp4') or media.endswith('.mov') %}
+                <video width="300" controls>
+                    <source src="{{ media.replace('static', '') }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- Message & Send -->
+    <form action="/send_messages" method="post">
+        <label class="form-label">✍️ Message:</label>
+        <textarea name="message" class="form-control mb-2" rows="3" required></textarea>
+
+        {% if contacts %}
+        <label class="form-label">🎯 Filter by Keyword in Name:</label>
+        <input type="text" name="keyword" class="form-control mb-2" placeholder="Optional filter...">
+
+        <label class="form-label">👥 Select Contacts to Send:</label>
+        <div class="form-check mb-3" style="max-height: 200px; overflow-y: auto;">
+            {% for contact in contacts %}
+                <div>
+                    <input class="form-check-input" type="checkbox" name="selected_contacts" value="{{ contact.number }}" id="c{{ loop.index }}" checked>
+                    <label class="form-check-label" for="c{{ loop.index }}">
+                        {{ contact.name }} - {{ contact.number }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <button class="btn btn-success">🚀 Send Messages</button>
+    </form>
+
+    {% if report %}
+        <hr>
+        <h5>📑 Delivery Report:</h5>
+        <pre class="bg-white p-3 border rounded" style="max-height: 200px; overflow-y: auto;">{{ report }}</pre>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
